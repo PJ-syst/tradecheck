@@ -1,6 +1,6 @@
 # TradeCheck submission preparation
 
-Status: source and paper demo are published at https://github.com/PJ-syst/tradecheck and https://pj-syst.github.io/tradecheck/. No social post or survey has been submitted. Live model validation, authenticated MCP mapping, and participant eligibility are outstanding.
+Status: source and paper demo are published at https://github.com/PJ-syst/tradecheck and https://pj-syst.github.io/tradecheck/. No social post or survey has been submitted. Genuine Codex OAuth and discovery are verified. Live model validation, Spot account tool mapping, and participant eligibility are outstanding.
 
 ## Event requirements checked September 8, 2026
 
@@ -8,7 +8,7 @@ The [official Binance mini-hackathon announcement](https://www.binance.com/en/bl
 
 The announcement excludes users in certain jurisdictions, including the US, UK, EEA, Hong Kong, and Singapore, plus Binance's prohibited jurisdictions. A Kampala timezone does not establish participant eligibility. Confirm the participant's actual jurisdiction, Binance account eligibility, and the current survey terms before submission. A REST-only price connection plus an unactivated MCP adapter does not establish that Track A requirements are met.
 
-Use the announcement's own links for the survey and social post. Publishing, following/reposting, submitting the survey, and sending messages remain separate user actions.
+Use the announcement's own links for the survey and social post. Following/reposting, submitting the survey, and sending messages remain separate user actions.
 
 ## Draft description
 
@@ -31,14 +31,14 @@ Run `npm run demo:record` after `npm run build`. The recording is captioned, sil
 | 66–77s | Show audit history and paper holdings                                                              |
 | 77–90s | Show editable rules and disclose pending model/account activation                                  |
 
-## Before publishing
+## Before submission
 
-- Finish authorized MCP discovery, verify actual balance/commission mappings, and test the account panel with read-only scope.
+- Obtain the required Spot account tools (absent from the 50-tool Codex inventory), verify balance/commission mappings, and test the account panel with read-only scope.
 - Configure a model and evaluate real ambiguous/injection requests. Current synthetic tests prove server boundaries, not live model comprehension.
 - Confirm eligibility and Track A acceptance of this implementation.
 - Prepare the public repository and hosted demo/video link. Source and paper demo links are now available above.
-- Review the description and recording, then authorize publishing separately.
+- Review the description and recording, then complete the announced social and survey steps.
 
 The source bundle can be generated with `pwsh -File scripts/package-source.ps1` (PowerShell 7); it excludes databases, environment files, credentials, node_modules, build output, and recordings. The video can be reviewed and uploaded separately.
 
-Binance rejected the custom OAuth client as unsupported (3346001). Codex is listed as supported and is the current connection path. Until a real supported-host integration is verified, do not claim an authenticated standalone TradeCheck account integration.
+Binance rejected the custom OAuth client as unsupported (3346001). Genuine Codex login succeeded and authenticated discovery returned 50 tools. The required Spot balance/commission tools were absent from that inventory. Until a real supported-host integration is verified, do not claim an authenticated standalone TradeCheck account integration.

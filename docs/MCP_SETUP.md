@@ -1,6 +1,14 @@
 # Read-only MCP account setup
 
-The local adapter is implemented and tested with synthetic tools. It is **not yet an authenticated Binance integration**. A live unauthenticated initialization returned HTTP 401 on September 8, 2026, so the actual tool schemas could not be discovered. No Binance tool names are guessed in the implementation.
+Genuine Codex OAuth login and authenticated discovery succeeded on September 8, 2026. The dashboard account adapter remains unactivated: the returned inventory contained 50 tools, with no Spot balance or commission tools and no read-only annotations. Do not substitute Futures balances for Spot or weaken the adapter's checks.
+
+Recheck the supported host connection without reading credentials or calling account/trading tools:
+
+```powershell
+python -m backend.codex_mcp --discover data/codex-binance-tools.json
+```
+
+This starts the installed Codex app server, identifies TradeCheck honestly, and uses its documented `mcpServerStatus/list` API. It starts no model turn, rejects interactive server requests, and saves only tool metadata under ignored `data/`. Codex manages the upstream OAuth session. See [Codex app-server documentation](https://developers.openai.com/codex/app-server/).
 
 ## Authorization
 

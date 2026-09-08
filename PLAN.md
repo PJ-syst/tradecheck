@@ -25,7 +25,8 @@ The default offline prototype is complete. Milestone 2 has public-data support p
 - Completed: exchangeInfo/avgPrice retrieval; quantity increments, quantity and applicable notional bounds, market permissions, paper position/order constraints, and rejection of unknown filters. Rounded purchase cost and unspent amount are visible. A live BNB price/filter/average-price check passed.
 - Implemented with synthetic tests: read-only MCP transport/discovery, fixed reviewed mappings, schema pinning, response validation, and a separate account panel for balances and commission components. Results remain in memory and do not fund the paper wallet or alter its simulated fee.
 - Custom OAuth login was rejected by Binance as an unsupported agent (3346001) and is disabled. Metadata support did not establish client acceptance. Connect through genuine Codex MCP; this does not authorize the standalone backend. A supported host integration or explicit standalone client approval remains required. Encrypted Windows-user model-key storage is implemented.
-- Pending: authenticated discovery and review of actual balance/commission tool names, schemas, and result mappings. Live unauthenticated initialization returned HTTP 401. No tool names are guessed.
+- Completed: genuine Codex OAuth login and authenticated tool discovery. The returned 50-tool inventory lacked Spot balance/commission tools and read-only annotations. A repeatable supported-host discovery command is implemented.
+- Pending: obtain the required Spot capabilities and review actual schemas/results before connecting the dashboard adapter.
 - Pending: live verification against the authorized account. Actual exchange reference-price overrides, account-wide limits, liquidity, slippage, and fee-asset execution remain outside the paper model. Its filter estimates are not complete real-order validation.
 
 Verification uses isolated paper databases. Browser tests now have a test-only private shutdown hook to avoid Windows cleanup hangs; the production server exposes no shutdown endpoint.
@@ -40,9 +41,9 @@ Verification uses isolated paper databases. Browser tests now have a test-only p
 ## Milestone 4 — Submission
 
 - Completed: captioned 90-second paper demo at `data/demo/tradecheck-paper-demo.mp4`; repeatable with `npm run demo:record`. It clearly uses fixture prices, a strict parser, and simulated funds.
-- Completed: README, MCP setup notes, submission draft, and source-bundle script. Nothing has been published or posted.
+- Completed: README, MCP setup notes, submission draft, and source-bundle script. The public repository and captioned demo are published at https://github.com/PJ-syst/tradecheck and https://pj-syst.github.io/tradecheck/. Social and survey steps remain.
 - Deadline verified from the official announcement: September 8, 2026, 23:59 UTC / September 9, 02:59 Kampala.
-- Pending: verify participant eligibility and Track A compliance after actual Agent OS activation; create/publish a remote repository and video/demo link; complete social and survey submission steps. Publishing and posting require a separate user request.
+- Pending: verify participant eligibility and Track A compliance after actual Agent OS activation; complete social and survey submission steps. Social posting requires explicit authorization.
 
 ## Stack and scope
 

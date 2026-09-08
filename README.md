@@ -58,7 +58,7 @@ In **Trading rules**, describe a change, click **Propose rule change**, review t
 
 ### Configure a read-only Binance account
 
-See [MCP setup and remaining activation work](docs/MCP_SETUP.md). The adapter accepts only fixed, reviewed tool mappings with pinned schemas and read-only annotations. Model outputs and browser requests cannot select MCP tools or supply their arguments.
+Genuine Codex OAuth is connected. Run `python -m backend.codex_mcp` to check the connection and save tool definitions without account calls. The dashboard account panel still needs the Spot capabilities missing from the returned inventory. See [MCP setup and remaining activation work](docs/MCP_SETUP.md). The adapter accepts only fixed, reviewed tool mappings with pinned schemas and read-only annotations. Model outputs and browser requests cannot select MCP tools or supply their arguments.
 
 The account panel fetches actual balances and commission components only when you click **Refresh account**. It keeps results in memory, marks snapshots stale after 60 seconds, and clears failed results. Account data does not fund the paper wallet or change its simulated fees. No order, transfer, or withdrawal endpoint is implemented.
 
@@ -78,7 +78,8 @@ Data persists in `data/tradecheck.sqlite3`. For a separate fresh demonstration w
 - `backend/market.py`: fixture and Binance public-price providers, validated responses, shared cache, and failure backoff.
 - `backend/filters.py`: exchange metadata validation, increment rounding, and paper MARKET-buy checks.
 - `backend/interpreter.py`: optional OpenAI structured interpretation and rule proposals without mutation capabilities.
-- `backend/mcp.py`: discovery and configurable read-only account adapter; actual authorization and tool mapping still required.
+- `backend/mcp.py`: configurable read-only account adapter; actual Spot tool mapping still required.
+- `backend/codex_mcp.py`: verified supported-host OAuth connection check and tool discovery without credential access or account/tool calls.
 - `backend/server.py`: loopback-only HTTP service, same-origin mutation checks, request token, JSON API, static frontend hosting.
 - `src/main.jsx`: React dashboard, preview and approval interaction, rule editor, activity and holdings.
 - `src/style.css`: responsive interface with desktop and mobile layouts.
@@ -106,7 +107,7 @@ npm run test:browser
 
 The browser tests use installed Microsoft Edge in headless mode, a temporary paper database, and port 8011. They do not change the wallet used by your app on port 8000. The test-only server has a private shutdown hook to avoid Windows process cleanup hangs; the production server has no such endpoint. Screenshots are saved under `data/screenshots/`.
 
-Verification: 57 backend/API tests and four browser workflows passed. Automated tests use synthetic market, model, and account responses and never contact a trading account. They verify enforcement under injected/malformed model outputs, not the semantic accuracy of a live model. A public Binance BNB price/filter/average-price smoke check passed on September 8, 2026. Live model behavior and authenticated MCP schemas/results remain unverified.
+Verification: 63 backend/API tests and four browser workflows passed. Automated tests use synthetic market, model, and account responses and never contact a trading account. They verify enforcement under injected/malformed model outputs, not the semantic accuracy of a live model. A public Binance BNB price/filter/average-price smoke check passed on September 8, 2026. Genuine Codex OAuth login and discovery succeeded; its 50-tool inventory lacked the required Spot balance and commission tools. Live model behavior and account results remain unverified.
 
 ## Demo and submission materials
 
@@ -118,6 +119,6 @@ Verification: 57 backend/API tests and four browser workflows passed. Automated 
 - [Official Spot public market-data guide](https://github.com/binance/binance-spot-api-docs/blob/master/faqs/market_data_only.md)
 - [Hackathon announcement](https://www.binance.com/en-IN/blog/community/8802181509900814931)
 
-The remaining activation work is configuring and validating a live model, completing MCP authorization and actual tool mappings, and confirming submission eligibility. Real trading requires a separate implementation and explicit account authorization.
+The remaining activation work is configuring and validating a live model, obtaining the required Spot capabilities and connecting actual account tool mappings, and confirming submission eligibility. Real trading requires a separate implementation and explicit account authorization.
 
 Binance's [official Agent OS setup guide](https://www.binance.com/en/blog/ecosystem/5991233187660196794) documents the MCP endpoint `https://agent.binance.com/mcp/agentic` and browser authentication with account permissions. The public REST adapter is separate from MCP.
