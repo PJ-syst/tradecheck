@@ -42,6 +42,9 @@ class CodexHost:
         # This diagnostic cannot start model turns or call MCP tools.
         if method not in {"initialize", "mcpServerStatus/list"}:
             raise AccountUnavailable("Only connection discovery is supported.")
+        return self._request(method, params)
+
+    def _request(self, method, params):
         self.sequence += 1
         request_id = self.sequence
         self.send({"jsonrpc": "2.0", "id": request_id, "method": method, "params": params})

@@ -412,6 +412,46 @@ h1 {
   padding: 5px 6px;
   white-space: nowrap;
 }
+.side-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.side-toggle button {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #e6eaed;
+  border-radius: 8px;
+  background: #fbfcfd;
+  font-weight: 600;
+  color: #59656b;
+}
+.side-toggle button.active {
+  background: #20754f;
+  color: white;
+  border-color: #196744;
+}
+.sell-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.sell-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 11px;
+  color: #59656b;
+}
+.sell-form select,
+.sell-form input {
+  padding: 10px 12px;
+  border: 1px solid #e6eaed;
+  border-radius: 8px;
+  background: #fbfcfd;
+  font-size: 14px;
+}
 textarea {
   width: 100%;
   resize: vertical;
@@ -1241,6 +1281,7 @@ footer span:first-child {
   }
   nav {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
     margin-top: 18px;
   }
@@ -1407,3 +1448,48 @@ footer span:first-child {
   width: 100%;
   margin: 12px 0;
 }
+
+.sell-form { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin: 16px 0; }
+.sell-form label { display: grid; gap: 7px; min-width: 0; }
+.sell-form input, .sell-form select { max-width: 100%; }
+.panel { overflow-wrap: anywhere; }
+
+/* Binance-inspired trading surface from DESIGN.md */
+:root {
+  font-family: "BinanceNova", "DM Sans", sans-serif;
+  color: #eaecef;
+  background: #0b0e11;
+  --muted: #929aa5;
+  --border: #2b3139;
+  --green: #0ecb81;
+  --mint: #1e2329;
+  --amber: #f0b90b;
+}
+body { background: #0b0e11; color: #eaecef; }
+.app-shell { background: #0b0e11; }
+.sidebar { background: #0b0e11; border-color: #2b3139; }
+.brand { color: #fcd535; }
+.brand-mark { background: #fcd535; color: #181a20; }
+.workspace-label, .eyebrow, .nav-item { color: #929aa5; }
+.nav-item.active { color: #fcd535; background: #1e2329; }
+.nav-count { background: #2b3139; color: #eaecef; }
+.main-shell, .topbar { background: #0b0e11; }
+.topbar { border-color: #2b3139; }
+.topbar strong, h1, h2, h3, .stat-value, .panel, .decision, .receipt { color: #eaecef; }
+.panel, .stat-card, .markets-panel, .activity-panel, .holdings-panel, .account-panel { background: #1e2329; border-color: #2b3139; }
+.panel-heading p, .disclosure, .stat-label, .activity-row p, .holding-row span, footer { color: #929aa5; }
+.primary-button { background: #fcd535; color: #181a20; border-color: #fcd535; }
+.primary-button:hover:not(:disabled) { background: #f0b90b; }
+.secondary-button { background: #2b3139; color: #eaecef; border-color: #2b3139; }
+.text-button, a { color: #fcd535; }
+input, textarea, select { background: #0b0e11; color: #eaecef; border-color: #2b3139; }
+.market-row, .activity-row, .holding-row, .check-row { border-color: #2b3139; }
+.green { color: #0ecb81; }
+.amber { color: #f0b90b; }
+.red, .decision-block .check-label { color: #f6465d; }
+.market-price, .stat-value { font-family: "BinancePlex", "DM Sans", sans-serif; }
+.market-change.positive { color: #0ecb81; }
+.market-change.negative { color: #f6465d; }
+.icon-tile, .event-icon { background: #2b3139; color: #fcd535; }
+.empty-preview, .activity-empty { background: #1e2329; color: #929aa5; }
+@media (max-width: 650px) { .sidebar { background: #0b0e11; } }

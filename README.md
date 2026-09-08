@@ -2,9 +2,25 @@
 
 Your rules. Every trade.
 
-A local prototype for an agent that previews Spot purchases, checks budgets and reserves, and asks for approval. Built for the Binance Agent OS hackathon concept.
+A local Track A prototype that assesses Spot BUY/HOLD/SELL decisions, previews paper trades, and publishes private portfolio reports.
 
-**Current status:** tested paper-trading application with Binance public prices and exchange-filter estimates, an optional OpenAI request interpreter, reviewable language-based rule proposals, and a configurable read-only MCP account adapter. Public Binance data was tested live. Model and account paths were tested with synthetic responses; neither is activated in this workspace. The default request field still uses a strict parser. A completed Agent OS integration must not be claimed until account authorization, actual tool-schema mapping, and end-to-end verification are complete.
+**Current status:** paper BUY/SELL workflow, optional structured model advice, live RSS news, verified public Agent OS Spot-price reads through Codex, and daily/monthly factual reports with private publication schedules. Live model advice still requires local model/key setup. Real-account accounting and external report delivery are not activated. See [the reviewed implementation plan](rem_plan.md) for remaining scope.
+
+### Track A workflow
+
+Run `python -m backend.setup` to configure a model and hidden API key locally, then `pwsh -File scripts/start-configured.ps1`. The configured launcher enables Binance public prices, Agent OS evidence, and the example CoinDesk news feed. Agent OS uses your existing Codex Binance login through the [documented app-server MCP tool-call interface](https://learn.chatgpt.com/docs/app-server). No Codex credentials are extracted.
+
+Research/Advice shows the assessment and sources. For BUY/SELL, enter an amount (USDT for buys, base-asset units for sells), preview it, then approve the paper trade separately. Default offline mode uses an explicitly labeled fixture assessment.
+
+Reports supports current day/month and previous completed periods, downloadable HTML/Markdown/JSON, and daily/monthly schedules at a selected Africa/Kampala time. Publication is private to the local dashboard. Leave the backend running to collect snapshots and execute schedules; startup retries pending work. Unknown historical valuations are disclosed. Reports use weighted-average paper accounting and factual summaries, not tax calculations or AI narrative.
+
+For a direct configured launch:
+
+```powershell
+python -m backend.server --interpreter openai --market-data binance --agentos --news-config news-config.example.json
+```
+
+Use your own RSS configuration with `--news-config`. `python -m backend.agentos` checks the three fixed public Spot reads. Binance AI research returned no data during verification; it is not presented as successful research.
 
 ## Run
 

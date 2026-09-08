@@ -1,0 +1,7 @@
+{
+  "feeds": [
+    {"id": "coindesk", "url": "https://www.coindesk.com/arc/outboundfeeds/rss/", "type": "rss"}
+  ],
+  "max_items": 30,
+  "asset_tags": ["BNB", "BTC", "ETH"]
+}

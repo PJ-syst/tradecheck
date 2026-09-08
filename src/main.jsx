@@ -19,6 +19,10 @@ import {
   LoaderCircle,
   X,
   Info,
+  LineChart,
+  Newspaper,
+  Download,
+  TrendingUp,
 } from "lucide-react";
 import "./style.css";
 
@@ -45,6 +49,42 @@ function App() {
   const [now, setNow] = useState(Date.now());
   const [ruleRequest, setRuleRequest] = useState("");
   const [proposed, setProposed] = useState(false);
+  const [tradeSide, setTradeSide] = useState("BUY");
+  const [tradeAsset, setTradeAsset] = useState("BNBUSDT");
+  const [tradeAmount, setTradeAmount] = useState("");
+  const [advice, setAdvice] = useState(null);
+  const [adviceRequest, setAdviceRequest] = useState({ asset: "BNBUSDT", horizon: "short", question: "" });
+  const [reports, setReports] = useState([]);
+  const [activeReport, setActiveReport] = useState(null);
+  const [schedules, setSchedules] = useState([]);
+  const [scheduleTime, setScheduleTime] = useState("08:00");
+  const [adviceAmount, setAdviceAmount] = useState("");
+
+  async function previewAdvice() {
+    setBusy(true); setError("");
+    try {
+      setPreview(await post(`advice/${advice.id}/preview`, { amount: adviceAmount }));
+      setReceipt(null); setTab("overview");
+    } catch (e) { setError(e.message); } finally { setBusy(false); }
+  }
+
+  async function saveSchedule(report_type) {
+    setBusy(true); setError("");
+    try {
+      const existing = schedules.find((s) => s.report_type === report_type);
+      await post("report-schedules", { id: existing?.id, report_type, local_time: scheduleTime,
+        timezone: "Africa/Kampala", destination: { type: "private" }, enabled: true });
+      await loadReports();
+    } catch (e) { setError(e.message); } finally { setBusy(false); }
+  }
+
+  async function toggleSchedule(schedule) {
+    setBusy(true); setError("");
+    try {
+      await post(`report-schedules/${schedule.id}`, { action: schedule.enabled ? "pause" : "enable" });
+      await loadReports();
+    } catch (e) { setError(e.message); } finally { setBusy(false); }
+  }
 
   async function refresh() {
     const response = await fetch("/api/state");
@@ -84,6 +124,80 @@ function App() {
     setError("");
     try {
       await refresh();
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function checkStructuredTrade(event) {
+    event.preventDefault();
+    if (!tradeAmount.trim() || busy) return;
+    setBusy(true);
+    setError("");
+    setNotice("");
+    setReceipt(null);
+    setPreview(null);
+    try {
+      const payload = { side: tradeSide, symbol: tradeAsset, quantity: tradeAmount };
+      setPreview(await post("preview", payload));
+      await refresh();
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function analyze(event) {
+    event.preventDefault();
+    if (busy) return;
+    setBusy(true);
+    setError("");
+    setAdvice(null);
+    try {
+      const result = await post("advice", { ...adviceRequest, symbol: adviceRequest.asset });
+      setAdvice(result);
+      setTab("advice");
+      await refresh();
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function loadReports() {
+    try {
+      const result = await fetch("/api/reports").then((r) => r.json());
+      setReports(result.reports || []);
+      const scheduled = await fetch("/api/report-schedules").then((r) => r.json());
+      setSchedules(scheduled.schedules || []);
+    } catch (e) {
+      setError(e.message);
+    }
+  }
+
+  async function generateReport(report_type, period = "current") {
+    setBusy(true);
+    setError("");
+    try {
+      await post("reports", { report_type, period });
+      await loadReports();
+      setNotice(`${report_type} report generated.`);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function openReport(report_id) {
+    setBusy(true);
+    try {
+      const result = await fetch(`/api/reports/${report_id}`).then((r) => r.json());
+      setActiveReport(result);
     } catch (e) {
       setError(e.message);
     } finally {
@@ -241,6 +355,20 @@ function App() {
             <History size={18} />
             Activity
           </button>
+          <button
+            className={tab === "advice" ? "nav-item active" : "nav-item"}
+            onClick={() => setTab("advice")}
+          >
+            <TrendingUp size={18} />
+            Research
+          </button>
+          <button
+            className={tab === "reports" ? "nav-item active" : "nav-item"}
+            onClick={() => { setTab("reports"); loadReports(); }}
+          >
+            <Newspaper size={18} />
+            Reports
+          </button>
         </nav>
         <div className="sidebar-bottom">
           <div className="sandbox-card">
@@ -270,7 +398,11 @@ function App() {
                 ? "Overview"
                 : tab === "rules"
                   ? "Trading rules"
-                  : "Activity"}
+                  : tab === "activity"
+                    ? "Activity"
+                    : tab === "advice"
+                      ? "Research"
+                      : "Reports"}
             </strong>
           </div>
           <span className="mode-pill">
@@ -286,14 +418,22 @@ function App() {
                   ? "Trade with a clear head."
                   : tab === "rules"
                     ? "Set your boundaries."
-                    : "Every decision, recorded."}
+                    : tab === "activity"
+                      ? "Every decision, recorded."
+                      : tab === "advice"
+                        ? "Research before you act."
+                        : "Portfolio reports."}
               </h1>
               <p>
                 {tab === "overview"
                   ? "A second look before your next move."
                   : tab === "rules"
                     ? "You decide the limits. TradeCheck checks every purchase."
-                    : "Follow the requests, checks, and paper purchases in your workspace."}
+                    : tab === "activity"
+                      ? "Follow the requests, checks, and paper purchases in your workspace."
+                      : tab === "advice"
+                        ? "Evidence, thesis, and risks for supported assets."
+                        : "Daily and monthly summaries of your paper portfolio."}
               </p>
             </div>
             <span className="local-badge">
@@ -361,63 +501,129 @@ function App() {
                         </span>
                         <div>
                           <h2>What’s your next move?</h2>
-                          <p>Check a purchase against your trading rules.</p>
+                          <p>Check a trade against your trading rules.</p>
                         </div>
                       </div>
-                      <span className="small-badge">SPOT BUY</span>
+                      <span className="small-badge">SPOT {tradeSide}</span>
                     </div>
-                    <form onSubmit={checkTrade}>
-                      <label className="sr-only" htmlFor="trade-request">
-                        Trade request
-                      </label>
-                      <textarea
-                        id="trade-request"
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        placeholder="Buy 40 USDT of BNB"
-                        maxLength={
-                          state.integration.interpreter ===
-                          "strict request parser"
-                            ? 200
-                            : 1000
-                        }
-                        rows={3}
-                        disabled={busy}
-                      />
-                      <div className="request-footer">
-                        <span>
-                          <LockKeyhole size={13} /> Every purchase needs your
-                          approval
-                        </span>
+                    <div className="side-toggle">
+                      {["BUY", "SELL"].map((side) => (
                         <button
-                          className="primary-button"
-                          disabled={busy || !message.trim()}
+                          key={side}
+                          type="button"
+                          className={tradeSide === side ? "active" : ""}
+                          onClick={() => setTradeSide(side)}
+                          disabled={busy}
                         >
-                          {busy ? (
-                            <LoaderCircle size={16} className="spin" />
-                          ) : (
-                            <ShieldCheck size={16} />
-                          )}
-                          Check trade
-                          <ArrowRight size={16} />
+                          {side}
                         </button>
-                      </div>
-                    </form>
-                    <div className="suggestions">
-                      <span>TRY A REQUEST</span>
-                      {["Buy 40 USDT of BNB", "Buy 20 USDT of BTC"].map(
-                        (example) => (
-                          <button
-                            key={example}
-                            disabled={busy}
-                            onClick={() => setMessage(example)}
-                          >
-                            {example}
-                            <ArrowUpRight size={12} />
-                          </button>
-                        ),
-                      )}
+                      ))}
                     </div>
+                    {tradeSide === "BUY" ? (
+                      <form onSubmit={checkTrade}>
+                        <label className="sr-only" htmlFor="trade-request">
+                          Trade request
+                        </label>
+                        <textarea
+                          id="trade-request"
+                          value={message}
+                          onChange={(e) => setMessage(e.target.value)}
+                          placeholder="Buy 40 USDT of BNB"
+                          maxLength={
+                            state.integration.interpreter ===
+                            "strict request parser"
+                              ? 200
+                              : 1000
+                          }
+                          rows={3}
+                          disabled={busy}
+                        />
+                        <div className="request-footer">
+                          <span>
+                            <LockKeyhole size={13} /> Every purchase needs your
+                            approval
+                          </span>
+                          <button
+                            className="primary-button"
+                            disabled={busy || !message.trim()}
+                          >
+                            {busy ? (
+                              <LoaderCircle size={16} className="spin" />
+                            ) : (
+                              <ShieldCheck size={16} />
+                            )}
+                            Check trade
+                            <ArrowRight size={16} />
+                          </button>
+                        </div>
+                      </form>
+                    ) : (
+                      <form onSubmit={checkStructuredTrade}>
+                        <div className="sell-form">
+                          <label>
+                            Asset
+                            <select
+                              value={tradeAsset}
+                              onChange={(e) => setTradeAsset(e.target.value)}
+                              disabled={busy}
+                            >
+                              {state.supported_pairs.map((sym) => (
+                                <option key={sym} value={sym}>
+                                  {asset(sym)}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                          <label>
+                            Quantity to sell
+                            <input
+                              type="number"
+                              step="0.00000001"
+                              min="0"
+                              value={tradeAmount}
+                              onChange={(e) => setTradeAmount(e.target.value)}
+                              placeholder="0.01"
+                              disabled={busy}
+                            />
+                          </label>
+                        </div>
+                        <div className="request-footer">
+                          <span>
+                            <LockKeyhole size={13} /> Sells require your
+                            approval
+                          </span>
+                          <button
+                            className="primary-button"
+                            disabled={busy || !tradeAmount.trim()}
+                          >
+                            {busy ? (
+                              <LoaderCircle size={16} className="spin" />
+                            ) : (
+                              <ShieldCheck size={16} />
+                            )}
+                            Check sale
+                            <ArrowRight size={16} />
+                          </button>
+                        </div>
+                      </form>
+                    )}
+                    {tradeSide === "BUY" && (
+                      <div className="suggestions">
+                        <span>TRY A REQUEST</span>
+                        {["Buy 40 USDT of BNB", "Buy 20 USDT of BTC"].map(
+                          (example) => (
+                            <button
+                              key={example}
+                              disabled={busy}
+                              onClick={() => setMessage(example)}
+                            >
+                              {example}
+                              <ArrowUpRight size={12} />
+                            </button>
+                          ),
+                        )}
+                      </div>
+                    )}
                   </section>
 
                   {preview ? (
@@ -435,21 +641,21 @@ function App() {
                           <h2>
                             {preview.allowed
                               ? "Within your limits."
-                              : "This purchase needs a rethink."}
+                              : preview.side === "SELL" ? "This sale needs a rethink." : "This purchase needs a rethink."}
                           </h2>
                           <p>
                             {preview.allowed
-                              ? "Review the details before approving this paper purchase."
+                              ? `Review the details before approving this paper ${preview.side === "SELL" ? "sale" : "purchase"}.`
                               : "This request does not meet all of your trading rules."}
                           </p>
                         </div>
                       </div>
                       <div className="trade-summary">
                         <span>
-                          BUY <strong>{asset(preview.symbol)}</strong>
+                          {preview.side || "BUY"} <strong>{asset(preview.symbol)}</strong>
                         </span>
                         <strong>
-                          {currency(preview.amount)} <small>USDT</small>
+                          {currency(preview.side === "SELL" ? preview.gross_proceeds : preview.amount)} <small>USDT</small>
                         </strong>
                       </div>
                       <p className="disclosure">
@@ -488,7 +694,7 @@ function App() {
                           <strong>{preview.fee} USDT</strong>
                         </div>
                         <div>
-                          <span>Total debit</span>
+                          <span>{preview.side === "SELL" ? "Net proceeds" : "Total debit"}</span>
                           <strong>{preview.total} USDT</strong>
                         </div>
                         <div>
@@ -510,7 +716,7 @@ function App() {
                             onClick={approve}
                           >
                             <Check size={16} />
-                            Approve paper purchase
+                            Approve paper {preview.side === "SELL" ? "sale" : "purchase"}
                           </button>
                         </div>
                       ) : (
@@ -552,13 +758,12 @@ function App() {
                       <span className="receipt-icon">
                         <CircleCheck size={30} />
                       </span>
-                      <h2>Paper purchase complete.</h2>
+                      <h2>Paper {receipt.side === "SELL" ? "sale" : "purchase"} complete.</h2>
                       <p>
-                        You added {receipt.quantity} {asset(receipt.symbol)} to
-                        your paper wallet.
+                        {receipt.side === "SELL" ? "You sold" : "You added"} {receipt.quantity} {asset(receipt.symbol)} {receipt.side === "SELL" ? "from" : "to"} your paper wallet.
                       </p>
                       <div>
-                        <span>Total debit</span>
+                        <span>{receipt.side === "SELL" ? "Net proceeds" : "Total debit"}</span>
                         <strong>{receipt.total} USDT</strong>
                       </div>
                       <div>
@@ -799,6 +1004,230 @@ function App() {
                 ) : (
                   <p>Your approved paper purchases will appear here.</p>
                 )}
+              </section>
+            </>
+          )}
+          {tab === "advice" && (
+            <>
+              <section className="panel trade-panel">
+                <div className="panel-heading">
+                  <div className="icon-title">
+                    <span className="icon-tile">
+                      <LineChart size={20} />
+                    </span>
+                    <div>
+                      <h2>Request an analysis</h2>
+                      <p>Choose an asset, horizon, and optional question.</p>
+                    </div>
+                  </div>
+                </div>
+                <form onSubmit={analyze}>
+                  <div className="sell-form">
+                    <label>
+                      Asset
+                      <select
+                        value={adviceRequest.asset}
+                        onChange={(e) =>
+                          setAdviceRequest({ ...adviceRequest, asset: e.target.value })
+                        }
+                        disabled={busy}
+                      >
+                        {state.supported_pairs.map((sym) => (
+                          <option key={sym} value={sym}>
+                            {asset(sym)}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>
+                      Horizon
+                      <select
+                        value={adviceRequest.horizon}
+                        onChange={(e) =>
+                          setAdviceRequest({ ...adviceRequest, horizon: e.target.value })
+                        }
+                        disabled={busy}
+                      >
+                        {["short", "medium", "long"].map((h) => (
+                          <option key={h} value={h}>
+                            {h}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+                  <label>
+                    Optional question
+                    <input
+                      type="text"
+                      value={adviceRequest.question}
+                      onChange={(e) =>
+                        setAdviceRequest({ ...adviceRequest, question: e.target.value })
+                      }
+                      placeholder="What would change your view?"
+                      disabled={busy}
+                    />
+                  </label>
+                  <button className="primary-button" disabled={busy}>
+                    {busy ? <LoaderCircle size={16} className="spin" /> : <TrendingUp size={16} />}
+                    Analyze
+                  </button>
+                </form>
+              </section>
+              {advice && (
+                <section className="panel decision decision-pass">
+                  <div className="decision-title">
+                    <LineChart size={24} />
+                    <div>
+                      <h2>
+                        {advice.output.recommendation.replace("_", " ")} · {asset(advice.asset)}
+                      </h2>
+                      <p>{advice.model}</p>
+                    </div>
+                  </div>
+                  <p className="disclosure">{advice.output.thesis}</p>
+                  <div className="checks">
+                    {advice.output.supporting_factors.map((f, i) => (
+                      <div className="check-row" key={`sup-${i}`}>
+                        <CircleCheck size={17} className="green" />
+                        <div>
+                          <strong>Supporting</strong>
+                          <p>{f}</p>
+                        </div>
+                      </div>
+                    ))}
+                    {advice.output.risks.map((f, i) => (
+                      <div className="check-row" key={`risk-${i}`}>
+                        <ShieldCheck size={17} className="amber" />
+                        <div>
+                          <strong>Risk</strong>
+                          <p>{f}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="disclosure">Evidence IDs: {advice.evidence_ids.join(", ")}</p>
+                  <p>{advice.output.news_impact}</p>
+                  <p>{advice.output.portfolio_impact}</p>
+                  {["opposing_factors", "missing_inputs", "invalidation_conditions"].map((key) => (
+                    <div key={key}><h3>{key.replaceAll("_", " ")}</h3>
+                      <ul>{advice.output[key].map((text, i) => <li key={i}>{text}</li>)}</ul></div>
+                  ))}
+                  {(advice.evidence || []).map((ev) => <p key={ev.id}>
+                    {ev.canonical_url?.startsWith("https://") ? <a href={ev.canonical_url} target="_blank" rel="noreferrer">{ev.headline}</a> : ev.source || ev.error || ev.id}
+                    {ev.published_at && ` · Published ${new Date(ev.published_at * 1000).toLocaleString()}`}
+                    {ev.price && ` · ${ev.price} USDT`}
+                    {ev.retrieved_at && ` · Retrieved ${new Date(ev.retrieved_at * 1000).toLocaleString()}`}
+                  </p>)}
+                  <p>Paper portfolio · {advice.horizon} horizon · Expires {quoteTime(advice.expires_at)}</p>
+                  {["BUY", "SELL"].includes(advice.output.recommendation) && <div className="sell-form">
+                    <label>Proposal amount ({advice.output.recommendation === "BUY" ? "USDT" : asset(advice.asset)})
+                      <input value={adviceAmount} onChange={(e) => setAdviceAmount(e.target.value)} inputMode="decimal" />
+                    </label>
+                    <button className="secondary-button" disabled={busy || !adviceAmount || now / 1000 >= advice.expires_at} onClick={previewAdvice}>Preview paper {advice.output.recommendation.toLowerCase()}</button>
+                  </div>}
+                </section>
+              )}
+            </>
+          )}
+          {tab === "reports" && (
+            <>
+              <section className="panel trade-panel">
+                <div className="panel-heading">
+                  <div className="icon-title">
+                    <span className="icon-tile">
+                      <Newspaper size={20} />
+                    </span>
+                    <div>
+                      <h2>Generate a report</h2>
+                      <p>Daily or month-to-date summaries of your paper portfolio.</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="sell-form">
+                  <button
+                    className="secondary-button"
+                    disabled={busy}
+                    onClick={() => generateReport("daily", "current")}
+                  >
+                    Daily current
+                  </button>
+                  <button
+                    className="secondary-button"
+                    disabled={busy}
+                    onClick={() => generateReport("monthly", "current")}
+                  >
+                    Monthly current
+                  </button>
+                </div>
+              </section>
+              {activeReport && (
+                <section className="panel decision decision-pass">
+                  <div className="section-title">
+                    <h2>{activeReport.calculations.period_label}</h2>
+                    <button className="icon-button" onClick={() => setActiveReport(null)}>
+                      <X size={20} />
+                    </button>
+                  </div>
+                  <p className="disclosure">Coverage: {activeReport.calculations.coverage}</p>
+                  {activeReport.calculations.coverage_notes.map((note, i) => <p key={i}>{note}</p>)}
+                  <p>Buys: {activeReport.calculations.buys} · Sells: {activeReport.calculations.sells} · Fees: {activeReport.calculations.fees} USDT · Realized P&amp;L: {activeReport.calculations.realized_pnl} USDT</p>
+                  <p className="disclosure">
+                    Opening value: {activeReport.calculations.opening_value} USDT · Closing value:{" "}
+                    {activeReport.calculations.closing_value} USDT
+                  </p>
+                  <div className="sell-form">
+                    <a
+                      className="text-button"
+                      href={`/api/reports/${activeReport.id}/download?format=markdown`}
+                    >
+                      <Download size={14} /> Markdown
+                    </a>
+                    <a
+                      className="text-button"
+                      href={`/api/reports/${activeReport.id}/download?format=html`}
+                    >
+                      <Download size={14} /> HTML
+                    </a>
+                    <a
+                      className="text-button"
+                      href={`/api/reports/${activeReport.id}/download?format=json`}
+                    >
+                      <Download size={14} /> JSON
+                    </a>
+                  </div>
+                </section>
+              )}
+              <section className="panel activity-panel">
+                <div className="section-title">
+                  <h2>Reports</h2>
+                </div>
+                {reports.length ? (
+                  reports.map((r) => (
+                    <div className="activity-row" key={r.id}>
+                      <span className="event-icon rules">
+                        <Newspaper size={17} />
+                      </span>
+                      <div>
+                        <strong>{r.report_type}</strong>
+                        <p>{r.period_label}</p>
+                      </div>
+                      <button className="text-button" onClick={() => openReport(r.id)}>
+                        View
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <p>No reports yet.</p>
+                )}
+              </section>
+              <section className="panel">
+                <h2>Private publication schedule</h2>
+                <p>Reports publish here while the backend runs. Missed runs are recovered at startup; unavailable historical values remain disclosed.</p>
+                <label>Publication time (Africa/Kampala)<input type="time" value={scheduleTime} onChange={(e) => setScheduleTime(e.target.value)} /></label>
+                <div className="sell-form">{["daily", "monthly"].map((type) => <button key={type} className="secondary-button" disabled={busy} onClick={() => saveSchedule(type)}>Schedule {type}</button>)}</div>
+                {schedules.map((s) => <div key={s.id} className="activity-row"><div><strong>{s.report_type} · {s.enabled ? "Enabled" : "Paused"}</strong><p>Next: {new Date(s.next_run * 1000).toLocaleString()} · {s.timezone}</p></div><button disabled={busy} onClick={() => toggleSchedule(s)}>{s.enabled ? "Pause" : "Enable"}</button></div>)}
+                <div className="sell-form"><button disabled={busy} onClick={() => generateReport("daily", "completed")}>Previous day</button><button disabled={busy} onClick={() => generateReport("monthly", "completed")}>Previous month</button></div>
               </section>
             </>
           )}
