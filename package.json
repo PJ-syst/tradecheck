@@ -1,0 +1,25 @@
+{
+  "name": "tradecheck",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "python -m unittest discover -s tests -v",
+    "test:browser": "playwright test",
+    "demo:record": "node scripts/record-demo.mjs",
+    "format": "prettier --write src index.html package.json vite.config.js playwright.config.js tests/browser README.md PLAN.md"
+  },
+  "dependencies": {
+    "lucide-react": "^0.468.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "prettier": "^3.9.6",
+    "vite": "^6.0.0"
+  }
+}

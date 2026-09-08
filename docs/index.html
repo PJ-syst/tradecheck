@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" /><meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  />
+  <title>TradeCheck — Your rules. Every trade.</title>
+  <style>
+    body {
+      margin: 0;
+      background: #f5f7f4;
+      color: #173c30;
+      font:
+        17px/1.7 system-ui,
+        sans-serif;
+    }
+    main {
+      max-width: 960px;
+      margin: auto;
+      padding: 64px 24px;
+    }
+    h1 {
+      font-size: clamp(44px, 8vw, 76px);
+      line-height: 1.05;
+      letter-spacing: -3px;
+      margin: 16px 0;
+    }
+    h2 {
+      font-size: 24px;
+    }
+    p {
+      max-width: 740px;
+    }
+    a {
+      color: #176149;
+    }
+    video {
+      width: 100%;
+      border-radius: 20px;
+      background: #183a30;
+      margin: 24px 0;
+    }
+    small {
+      color: #50675e;
+    }
+    .badge {
+      font-size: 13px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .links {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .links a {
+      background: #1e674f;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 9px;
+      text-decoration: none;
+    }
+    section {
+      border-top: 1px solid #d8e1da;
+      padding: 24px 0;
+    }
+    li {
+      margin: 8px 0;
+    }
+  </style>
+  <main>
+    <span class="badge">TradeCheck · local paper-trading prototype</span>
+    <h1>Your rules.<br />Every trade.</h1>
+    <p>
+      Check a proposed Spot purchase against your budget and protected reserve.
+      Review the cost, understand a rejection, and explicitly approve each paper
+      purchase.
+    </p>
+    <div class="links">
+      <a href="https://github.com/PJ-syst/tradecheck">View the source</a
+      ><a href="demo.mp4" download>Download the 90-second demo</a>
+    </div>
+    <video
+      controls
+      preload="metadata"
+      src="demo.mp4"
+      aria-label="TradeCheck paper purchase demonstration"
+    ></video>
+    <small
+      >The captioned demo uses fixture prices, a strict parser, and simulated
+      funds. It shows rejection, revision, approval, and audit history. No real
+      trading is demonstrated.</small
+    >
+    <section>
+      <h2>Built and tested</h2>
+      <ul>
+        <li>Server-enforced budgets, reserves, and allowed markets.</li>
+        <li>Expiring previews and atomic, idempotent paper approvals.</li>
+        <li>Public Binance prices and exchange-filter estimates.</li>
+        <li>
+          Optional structured model interpretation and reviewable rule
+          proposals.
+        </li>
+        <li>A read-only MCP adapter with a separate account display.</li>
+      </ul>
+    </section>
+    <section>
+      <h2>Integration status</h2>
+      <p>
+        Public Binance data has been checked live. Model and authenticated
+        account activation still require user setup and live verification. The
+        local OAuth sign-in flow uses PKCE and encrypted Windows credential
+        storage. Actual account tool mappings are reviewed after authenticated
+        discovery.
+      </p>
+      <p>
+        This is a local prototype, not an exchange execution service. Real
+        orders, transfers, and withdrawals are not implemented.
+      </p>
+    </section>
+    <section>
+      <h2>Run locally</h2>
+      <p>
+        Follow the
+        <a href="https://github.com/PJ-syst/tradecheck#readme">README</a> for
+        installation, model setup, and Binance sign-in.
+      </p>
+    </section>
+  </main>
+</html>

@@ -1,0 +1,9 @@
+{
+  "client_id": "https://pj-syst.github.io/tradecheck/oauth-client.json",
+  "client_name": "TradeCheck — read-only account and paper trading",
+  "client_uri": "https://pj-syst.github.io/tradecheck/",
+  "redirect_uris": ["http://127.0.0.1:8765/callback"],
+  "grant_types": ["authorization_code"],
+  "response_types": ["code"],
+  "token_endpoint_auth_method": "none"
+}
