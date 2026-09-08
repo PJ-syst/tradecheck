@@ -1,6 +1,6 @@
 # TradeCheck submission preparation
 
-Status: local prototype and review materials. Nothing has been published or posted. Live model validation, authenticated MCP mapping, and participant eligibility are outstanding.
+Status: source and paper demo are published at https://github.com/PJ-syst/tradecheck and https://pj-syst.github.io/tradecheck/. No social post or survey has been submitted. Live model validation, authenticated MCP mapping, and participant eligibility are outstanding.
 
 ## Event requirements checked September 8, 2026
 
@@ -36,7 +36,9 @@ Run `npm run demo:record` after `npm run build`. The recording is captioned, sil
 - Finish authorized MCP discovery, verify actual balance/commission mappings, and test the account panel with read-only scope.
 - Configure a model and evaluate real ambiguous/injection requests. Current synthetic tests prove server boundaries, not live model comprehension.
 - Confirm eligibility and Track A acceptance of this implementation.
-- Prepare the public repository and hosted demo/video link. There is no remote repository in this workspace yet.
+- Prepare the public repository and hosted demo/video link. Source and paper demo links are now available above.
 - Review the description and recording, then authorize publishing separately.
 
 The source bundle can be generated with `pwsh -File scripts/package-source.ps1` (PowerShell 7); it excludes databases, environment files, credentials, node_modules, build output, and recordings. The video can be reviewed and uploaded separately.
+
+Binance rejected the custom OAuth client as unsupported (3346001). Codex is listed as supported and is the current connection path. Until a real supported-host integration is verified, do not claim an authenticated standalone TradeCheck account integration.

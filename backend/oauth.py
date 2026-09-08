@@ -92,69 +92,7 @@ def callback_code(path, expected_state):
 
 
 def login(open_browser=True):
-    from backend.credentials import save
-    metadata = discover()
-    authorization = metadata["authorization_server"]
-    if metadata["resource"]["resource"] != ENDPOINT or authorization.get("client_id_metadata_document_supported") is not True or "S256" not in authorization.get("code_challenge_methods_supported", []):
-        raise ValueError("Binance does not advertise the required client-metadata and PKCE flow.")
-    with build_opener(NoRedirect()).open(CLIENT_ID, timeout=10) as response:
-        client = json.loads(response.read(16384))
-        if client.get("client_id") != CLIENT_ID or REDIRECT not in client.get("redirect_uris", []):
-            raise ValueError("The public OAuth client metadata is not ready.")
-    state, verifier = secrets.token_urlsafe(32), secrets.token_urlsafe(48)
-    result = {}
-
-    class Callback(BaseHTTPRequestHandler):
-        def log_message(self, *args):
-            pass  # Never log callback codes or query strings.
-
-        def do_GET(self):
-            try:
-                if self.headers.get("Host") != "127.0.0.1:8765":
-                    raise ValueError("Invalid callback host.")
-                code = callback_code(self.path, state)
-                if result:
-                    raise ValueError("This callback was already used.")
-                result["code"] = code
-                status, message = 200, "Sign-in received. Return to TradeCheck; this tab can be closed."
-            except ValueError:
-                status, message = 400, "Sign-in callback rejected. Return to TradeCheck and retry if needed."
-            body = message.encode()
-            self.send_response(status)
-            self.send_header("Content-Type", "text/plain; charset=utf-8")
-            self.send_header("Content-Length", str(len(body)))
-            self.send_header("Cache-Control", "no-store")
-            self.send_header("Referrer-Policy", "no-referrer")
-            self.end_headers()
-            self.wfile.write(body)
-
-    with HTTPServer(("127.0.0.1", 8765), Callback) as server:
-        server.timeout = 1
-        url = official_url(authorization["authorization_endpoint"]) + "?" + urlencode(authorization_parameters(state, verifier))
-        print("On Binance, select Account read access and leave Trade and Transfer disabled.", flush=True)
-        print("Authorize TradeCheck in your browser. Waiting up to 10 minutes.", flush=True)
-        if open_browser:
-            webbrowser.open(url)
-        else:
-            print(url, flush=True)
-        deadline = time.monotonic() + 600
-        while not result and time.monotonic() < deadline:
-            server.handle_request()
-        if not result:
-            raise ValueError("Sign-in timed out. Run the sign-in command again when ready.")
-    token_request = Request(official_url(authorization["token_endpoint"]), data=urlencode({
-        "grant_type": "authorization_code", "client_id": CLIENT_ID, "code": result["code"],
-        "code_verifier": verifier, "redirect_uri": REDIRECT, "resource": ENDPOINT}).encode(),
-        headers={"Content-Type": "application/x-www-form-urlencoded", "Accept": "application/json"})
-    with build_opener(NoRedirect()).open(token_request, timeout=15) as response:
-        tokens = json.loads(response.read(65536))
-    if not isinstance(tokens, dict) or not isinstance(tokens.get("access_token"), str) or not tokens["access_token"] or tokens.get("token_type", "").lower() != "bearer":
-        raise ValueError("Binance did not return a usable bearer token.")
-    ttl = tokens.get("expires_in", 3600)
-    if type(ttl) not in {int, float} or not 0 < ttl <= 31536000:
-        raise ValueError("Binance returned an invalid token lifetime.")
-    save("binance", {"access_token": tokens["access_token"], "expires_at": time.time() + ttl, "resource": ENDPOINT})
-    print("Binance sign-in saved with Windows user encryption. No account or trading tools were called.", flush=True)
+    raise ValueError("Binance rejected TradeCheck's custom client as unsupported (3346001). Use the supported Codex client: codex mcp add binance --url https://agent.binance.com/mcp/agentic. Do not copy Codex tokens into TradeCheck.")
 
 
 if __name__ == "__main__":

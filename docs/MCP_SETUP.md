@@ -6,13 +6,25 @@ The local adapter is implemented and tested with synthetic tools. It is **not ye
 
 Binance documents the endpoint `https://agent.binance.com/mcp/agentic` and a browser authorization flow in its [official setup guide](https://www.binance.com/en/blog/ecosystem/5991233187660196794). Its [MCP FAQ](https://www.binance.com/en/support/faq/detail/7a6e676e36fb455d96478932cb12d9f3) distinguishes Market data, Account, Trade, and Transfer scopes. For this application, use Account read access and leave Trade/Transfer disabled. Confirm which Agentic sub-account or permitted main-account view the authorization exposes.
 
-Run `python -m backend.oauth --login` after the public OAuth client metadata is reachable at https://pj-syst.github.io/tradecheck/oauth-client.json. The flow uses Binance's advertised client-metadata support, a loopback callback, state validation, and PKCE S256. Select Account read access and leave Trade/Transfer disabled in Binance's authorization screen. A successful token is encrypted for your Windows user under ignored `data/`; it never appears in the browser app, logs, or Git.
+Binance rejected the custom TradeCheck OAuth client with error `3346001`: the agent is not supported. Public discovery advertised OAuth capabilities, but that does not mean arbitrary clients are accepted. The custom login command is now disabled.
 
-OAuth metadata discovery was verified live. User sign-in and account reads still require end-to-end verification. The server also accepts `BINANCE_MCP_TOKEN` from an externally authorized setup. Automatic refresh is not implemented because the advertised metadata lists only authorization_code; sign in again on expiry.
+Use a genuine supported client. Binance explicitly lists Codex and Codex CLI in its FAQ:
+
+```powershell
+codex mcp add binance --url https://agent.binance.com/mcp/agentic
+# For an already configured server:
+codex mcp login binance
+```
+
+Follow the URL printed by Codex on the same computer. Select Account read access and leave Trade/Transfer disabled. Codex manages its own authorization and credential storage. **Do not extract Codex's token or reuse its client identity in TradeCheck.**
+
+This connects Binance to Codex. It does not activate the standalone account panel. A supported Codex-mediated integration or explicit Binance approval of a standalone client is still required. The existing standalone adapter remains unactivated; its environment token option is only for authorization explicitly issued to that application.
+
+The Windows encrypted model-key setup is separate and remains available with `python -m backend.setup`.
 
 ## Discover, review, and pin tools
 
-After browser sign-in or an externally authorized server token is available:
+Only after Binance explicitly authorizes the standalone application and provides its own valid server token:
 
 ```powershell
 python -m backend.mcp --discover data/mcp-tools.json

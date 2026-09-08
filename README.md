@@ -40,7 +40,7 @@ Omit `--market-data` (or use `--market-data fixture`) for the offline demo below
 
 ### Activate the language agent
 
-On Windows, run `python -m backend.setup` to enter a model ID and a hidden API key, verify one interpretation, and save the key encrypted for your Windows user under ignored `data/`. Then run `pwsh -File scripts/start-configured.ps1`. Binance browser sign-in is available with `python -m backend.oauth --login` once the public client metadata is deployed. Do not paste credentials into chat or source files.
+On Windows, run `python -m backend.setup` to enter a model ID and a hidden API key, verify one interpretation, and save the key encrypted for your Windows user under ignored `data/`. Then run `pwsh -File scripts/start-configured.ps1`. Binance rejected the custom TradeCheck OAuth client as unsupported (3346001). Connect through the genuine supported Codex client using `codex mcp add binance --url https://agent.binance.com/mcp/agentic`. This authorizes Codex, not the standalone TradeCheck backend. Do not paste credentials into chat or source files.
 
 Configure a Responses-compatible OpenAI model in your server terminal. PowerShell 7 can prompt for a key without putting its literal value in command history:
 
